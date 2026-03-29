@@ -1,0 +1,16 @@
+{
+  "name": "@admin-panel/utils",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@admin-panel/config": "*",
+    "bcrypt": "^5.1.1",
+    "csv-parse": "^5.5.6",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.5.0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@admin-panel/db",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "@admin-panel/config": "*"
+  }
+}
