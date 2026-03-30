@@ -8,7 +8,9 @@ const Dashboard = () => {
   const [stats, setStats] = useState({ totalColleges: 0, totalUsers: 0, activeUsers: 0 })
 
   useEffect(() => {
-    api.get('/dashboard/stats').then(res => setStats(res.data))
+    api.get('/dashboard/stats')
+      .then(res => setStats(res.data))
+      .catch(() => setStats({ totalColleges: 0, totalUsers: 0, activeUsers: 0 }));
   }, [])
 
   const data = [

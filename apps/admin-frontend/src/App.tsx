@@ -1,10 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
-import { LayoutDashboard, GraduationCap, Users, Upload } from 'lucide-react'
+import { LayoutDashboard, GraduationCap, Users as UsersIcon, Upload } from 'lucide-react'
 import Dashboard from './pages/Dashboard'
 import Colleges from './pages/Colleges'
-import BulkUpload from './pages/BulkUpload'
-
-const UsersPage = () => <div className="p-8"><h1>Users List (Coming Soon)</h1></div>
+import Users from './pages/Users'
 
 function App() {
   return (
@@ -13,7 +11,7 @@ function App() {
         {/* Sidebar */}
         <div className="w-64 glass border-r border-white/10 p-6 flex flex-col gap-8">
           <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent px-2">
-            EduAdmin
+            JobReady
           </div>
           <nav className="flex flex-col gap-2">
             <Link to="/" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-400 hover:text-white group">
@@ -23,10 +21,7 @@ function App() {
               <GraduationCap size={20} className="group-hover:text-purple-400" /> Colleges
             </Link>
             <Link to="/users" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-400 hover:text-white group">
-              <Users size={20} className="group-hover:text-green-400" /> Users
-            </Link>
-            <Link to="/bulk-upload" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-400 hover:text-white group">
-              <Upload size={20} className="group-hover:text-orange-400" /> Bulk Upload
+              <UsersIcon size={20} className="group-hover:text-green-400" /> Users
             </Link>
           </nav>
         </div>
@@ -36,8 +31,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/colleges" element={<Colleges />} />
-            <Route path="/users" element={<UsersPage />} />
-            <Route path="/bulk-upload" element={<BulkUpload />} />
+            <Route path="/users" element={<Users />} />
           </Routes>
         </main>
       </div>
