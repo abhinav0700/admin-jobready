@@ -7,21 +7,25 @@ export class CollegeService {
     if (error) throw error;
 
     const collegesWithCount = await Promise.all(colleges.map(async (college) => {
-      const userCountResp = await supabase
+      const { data: users, error: usersError } = await supabase
         .from('users')
-        .select('*', { count: 'exact', head: true })
+        .select('id')
         .eq('college_id', college.id);
+      if (usersError) throw usersError;
 
-      // Fallback to profiles if no users found in users table
-      let userCount = userCountResp.count || 0;
-      if (!userCount) {
-        const profileCountResp = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true })
-          .or(`college_id.eq.${college.id},college.eq.${college.name}`);
-        userCount = profileCountResp.count || 0;
-      }
+      const userIds = new Set((users || []).map((u: any) => u.id));
 
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, college_id, college')
+        .or(`college_id.eq.${college.id},college.eq.${college.name}`);
+      if (profilesError) throw profilesError;
+
+      const extraProfileCount = (profiles || [])
+        .filter((p: any) => !userIds.has(p.id))
+        .length;
+
+      const userCount = userIds.size + extraProfileCount;
       return { ...college, user_count: userCount };
     }));
 

@@ -3,6 +3,7 @@ import { LayoutDashboard, GraduationCap, Users as UsersIcon, Upload } from 'luci
 import Dashboard from './pages/Dashboard'
 import Colleges from './pages/Colleges'
 import Users from './pages/Users'
+import UserDetails from './pages/UserDetails'
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/colleges" element={<Colleges />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/users/:id" element={<UserDetails />} />
           </Routes>
         </main>
       </div>

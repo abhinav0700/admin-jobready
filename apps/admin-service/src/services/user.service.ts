@@ -44,35 +44,13 @@ export class UserService {
   }
 
   async getByCollege(collegeId: string): Promise<any[]> {
-    const { data, error } = await supabase
+    const { data: users, error: usersError } = await supabase
       .from('users')
       .select('*, colleges(id, name, domain)')
       .eq('college_id', collegeId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    if (data && data.length > 0) return data;
-
-    // Fallback to profiles (public.profiles) for this college
-    const { data: profiles, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, full_name, college, college_id, created_at')
-      .or(`college_id.eq.${collegeId},college.eq.${collegeId}`)
-      .order('created_at', { ascending: false });
-
-    if (profileError) throw profileError;
-    if (!profiles || profiles.length === 0) return [];
-
-    // Fetch matching users in public.users for email/username if present
-    const ids = profiles.map((p: any) => p.id);
-    const { data: publicUsers, error: publicUsersError } = await supabase
-      .from('users')
-      .select('id, email, username, role, is_password_changed')
-      .in('id', ids);
-
-    if (publicUsersError) throw publicUsersError;
-
-    const userMap = new Map((publicUsers || []).map((u: any) => [u.id, u]));
+    if (usersError) throw usersError;
 
     const { data: collegeDataSet, error: collegeError } = await supabase
       .from('colleges')
@@ -82,21 +60,40 @@ export class UserService {
 
     if (collegeError && collegeError.code !== 'PGRST116') throw collegeError;
 
-    return profiles.map((p: any) => {
-      const matched = userMap.get(p.id) || {};
-      return {
+    const userIds = new Set((users || []).map((u: any) => u.id));
+
+    const profileOrQuery = collegeDataSet?.name
+      ? `college_id.eq.${collegeId},college.eq.${collegeDataSet.name}`
+      : `college_id.eq.${collegeId}`;
+
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, full_name, college, college_id, created_at')
+      .or(profileOrQuery)
+      .order('created_at', { ascending: false });
+
+    if (profileError) throw profileError;
+
+    const profileOnly = (profiles || [])
+      .filter((p: any) => !userIds.has(p.id))
+      .map((p: any) => ({
         id: p.id,
-        email: matched.email ?? null,
-        username: matched.username ?? p.full_name ?? p.id,
+        email: null,
+        username: p.full_name ?? p.id,
         full_name: p.full_name,
         college: p.college,
         college_id: p.college_id,
-        is_password_changed: matched.is_password_changed ?? false,
-        role: matched.role ?? 'student',
+        is_password_changed: false,
+        role: 'student',
         created_at: p.created_at,
         colleges: collegeDataSet ? { ...collegeDataSet } : null,
-      };
-    });
+      }));
+
+    const combined = [...(users || []), ...profileOnly];
+
+    return combined.sort((a: any, b: any) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
   }
 
   async getAll(): Promise<User[]> {

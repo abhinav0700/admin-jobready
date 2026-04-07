@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Users, Search, Filter, Mail, User, Calendar, Shield } from 'lucide-react'
 import api from '../lib/api'
 import { motion } from 'framer-motion'
@@ -7,6 +8,7 @@ import { User as UserType, College } from '@admin-panel/types'
 type UserWithCollege = UserType & { college?: string | null; colleges?: College | null; full_name?: string | null }
 
 const UsersPage = () => {
+  const navigate = useNavigate()
   const [users, setUsers] = useState<UserWithCollege[]>([])
   const [colleges, setColleges] = useState<College[]>([])
   const [selectedCollege, setSelectedCollege] = useState('')
@@ -171,7 +173,8 @@ const UsersPage = () => {
                       key={user.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="hover:bg-white/5 transition-colors"
+                      className="hover:bg-white/5 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/users/${user.id}`)}
                     >
                       <td className="p-4">
                         <div className="flex items-center gap-3">
