@@ -14,7 +14,7 @@ export interface User {
   password_hash: string;
   college_id: string | null;
   is_password_changed: boolean;
-  role: 'admin' | 'college_admin' | 'student';
+  role: 'admin' | 'college_admin' | 'student' | 'faculty';
   created_at: string;
   colleges?: College | null; // for joined college relation
 }

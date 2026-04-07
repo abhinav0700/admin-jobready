@@ -1,9 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
-import { LayoutDashboard, GraduationCap, Users as UsersIcon, Upload } from 'lucide-react'
+import { LayoutDashboard, GraduationCap, Users as UsersIcon, Upload, ShieldCheck } from 'lucide-react'
 import Dashboard from './pages/Dashboard'
 import Colleges from './pages/Colleges'
 import Users from './pages/Users'
 import UserDetails from './pages/UserDetails'
+import FacultyColleges from './pages/FacultyColleges'
+import FacultyManagement from './pages/FacultyManagementPage'
 
 function App() {
   return (
@@ -24,6 +26,9 @@ function App() {
             <Link to="/users" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-400 hover:text-white group">
               <UsersIcon size={20} className="group-hover:text-green-400" /> Users
             </Link>
+            <Link to="/faculty" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-400 hover:text-white group">
+              <ShieldCheck size={20} className="group-hover:text-orange-400" /> Faculty
+            </Link>
           </nav>
         </div>
 
@@ -34,6 +39,8 @@ function App() {
             <Route path="/colleges" element={<Colleges />} />
             <Route path="/users" element={<Users />} />
             <Route path="/users/:id" element={<UserDetails />} />
+            <Route path="/faculty" element={<FacultyColleges />} />
+            <Route path="/faculty/college/:id" element={<FacultyManagement />} />
           </Routes>
         </main>
       </div>

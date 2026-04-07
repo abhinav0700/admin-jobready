@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Users, ArrowLeft, Mail, User, Calendar, Shield, TrendingUp, Target, Clock, AlertTriangle, GraduationCap } from 'lucide-react'
+import { Users, ArrowLeft, Mail, User, Calendar, Shield, TrendingUp, Target, Clock, AlertTriangle, GraduationCap, BarChart3 } from 'lucide-react'
 import api from '../lib/api'
 import { motion } from 'framer-motion'
+import StudentMetrics from '../components/StudentMetrics'
 
 type UserDetails = {
   user: any
@@ -20,6 +21,7 @@ const UserDetailsPage = () => {
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showMetrics, setShowMetrics] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -208,6 +210,13 @@ const UserDetailsPage = () => {
               </p>
             </div>
           </div>
+          <button
+            onClick={() => setShowMetrics(true)}
+            className="w-full mt-4 flex items-center justify-center gap-2 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl border border-primary/20 transition-all font-semibold text-sm"
+          >
+            <BarChart3 size={16} />
+            View Full Performance
+          </button>
         </div>
 
         <div className="glass p-6 rounded-2xl">
@@ -269,6 +278,14 @@ const UserDetailsPage = () => {
             ))}
           </div>
         </motion.div>
+      )}
+
+      {showMetrics && id && (
+        <StudentMetrics
+          userId={id}
+          fullName={userDetails.user?.username || 'Student'}
+          onClose={() => setShowMetrics(false)}
+        />
       )}
     </div>
   )

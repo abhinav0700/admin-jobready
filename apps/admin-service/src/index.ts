@@ -7,6 +7,7 @@ import { authRouter } from './routes/auth.routes';
 import { collegeRouter } from './routes/college.routes';
 import { userRouter } from './routes/user.routes';
 import { dashboardRouter } from './routes/dashboard.routes';
+import { facultyRouter } from './routes/faculty.routes';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/colleges', collegeRouter);
 app.use('/api/users', userRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/faculty', facultyRouter);
 
 // Try to find an available port
 const tryPort = (startPort: number, maxAttempts: number = 20): Promise<number> => {

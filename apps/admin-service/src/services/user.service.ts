@@ -104,4 +104,84 @@ export class UserService {
     if (error) throw error;
     return data as User[];
   }
+
+  async getUserDetails(userId: string): Promise<any> {
+    // 1. Fetch user account info from 'users'
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*, colleges(id, name, domain, is_active)')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (userError) throw userError;
+
+    // 2. Fallback to 'profiles' if user not found in 'users'
+    let profile = null;
+    if (!user) {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+      
+      if (profileError) throw profileError;
+      profile = profileData;
+    }
+
+    // 3. Fetch performance data
+    const { data: performance, error: perfError } = await supabase
+      .from('user_performance')
+      .select(`
+        user_id, 
+        total_score, 
+        tasks_completed, 
+        tasks_failed, 
+        avg_score, 
+        streak_days, 
+        current_level, 
+        last_task_completed_at, 
+        updated_at
+      `)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (perfError) throw perfError;
+
+    // 4. Define default performance if missing
+    const defaultPerformance = {
+      user_id: userId,
+      total_score: 0,
+      tasks_completed: 0,
+      tasks_failed: 0,
+      avg_score: 0,
+      streak_days: 0,
+      current_level: 1,
+      last_task_completed_at: null,
+      updated_at: new Date().toISOString()
+    };
+
+    // 5. Calculate simulated stats
+    const createdDate = user?.created_at || profile?.created_at ? new Date(user?.created_at || profile?.created_at) : new Date();
+    const accountAge = Math.floor((new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Determine the most descriptive username/full name
+    const displayName = user?.username || profile?.full_name || 'Unknown User';
+
+    return {
+      user: user || { 
+        id: userId, 
+        username: displayName, 
+        role: 'student',
+        created_at: profile?.created_at,
+        colleges: profile?.college_id ? { id: profile.college_id, name: profile.college } : null
+      },
+      performance: performance || defaultPerformance,
+      stats: {
+        totalActions: performance?.tasks_completed || 0,
+        lastActivity: performance?.last_task_completed_at || null,
+        accountAge: accountAge
+      },
+      recentActivity: [] // Placeholder
+    };
+  }
 }
