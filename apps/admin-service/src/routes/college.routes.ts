@@ -23,6 +23,17 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
+router.put('/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, domain } = req.body;
+    const college = await collegeService.update(id, name, domain);
+    res.json(college);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.patch('/:id/toggle', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

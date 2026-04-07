@@ -43,11 +43,64 @@ export class UserService {
     return results;
   }
 
-  async getByCollege(collegeId: string): Promise<User[]> {
+  async getByCollege(collegeId: string): Promise<any[]> {
+    const { data: users, error: usersError } = await supabase
+      .from('users')
+      .select('*, colleges(id, name, domain)')
+      .eq('college_id', collegeId)
+      .order('created_at', { ascending: false });
+
+    if (usersError) throw usersError;
+
+    const { data: collegeDataSet, error: collegeError } = await supabase
+      .from('colleges')
+      .select('id, name, domain')
+      .eq('id', collegeId)
+      .single();
+
+    if (collegeError && collegeError.code !== 'PGRST116') throw collegeError;
+
+    const userIds = new Set((users || []).map((u: any) => u.id));
+
+    const profileOrQuery = collegeDataSet?.name
+      ? `college_id.eq.${collegeId},college.eq.${collegeDataSet.name}`
+      : `college_id.eq.${collegeId}`;
+
+    const { data: profiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, full_name, college, college_id, created_at')
+      .or(profileOrQuery)
+      .order('created_at', { ascending: false });
+
+    if (profileError) throw profileError;
+
+    const profileOnly = (profiles || [])
+      .filter((p: any) => !userIds.has(p.id))
+      .map((p: any) => ({
+        id: p.id,
+        email: null,
+        username: p.full_name ?? p.id,
+        full_name: p.full_name,
+        college: p.college,
+        college_id: p.college_id,
+        is_password_changed: false,
+        role: 'student',
+        created_at: p.created_at,
+        colleges: collegeDataSet ? { ...collegeDataSet } : null,
+      }));
+
+    const combined = [...(users || []), ...profileOnly];
+
+    return combined.sort((a: any, b: any) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  }
+
+  async getAll(): Promise<User[]> {
     const { data, error } = await supabase
       .from('users')
-      .select('*')
-      .eq('college_id', collegeId);
+      .select('*, colleges(id, name, domain)')
+      .order('created_at', { ascending: false });
     if (error) throw error;
     return data as User[];
   }

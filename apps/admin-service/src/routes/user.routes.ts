@@ -4,12 +4,32 @@ import { UserService } from '../services/user.service';
 const router = Router();
 const userService = new UserService();
 
+router.get('/', async (req: Request, res: Response) => {
+  try {
+    const users = await userService.getAll();
+    res.json(users);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get('/college/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) throw new Error('ID is required');
     const users = await userService.getByCollege(id);
     res.json(users);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/:id/details', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) throw new Error('ID is required');
+    const details = await userService.getUserDetails(id);
+    res.json(details);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

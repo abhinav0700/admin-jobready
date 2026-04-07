@@ -13,7 +13,7 @@ const configSchema = z.object({
   supabaseUrl: z.string().url(),
   supabaseKey: z.string().min(1),
   jwtSecret: z.string().min(1),
-  adminServicePort: z.coerce.number().default(5000),
+  adminServicePort: z.coerce.number().default(5003),
 });
 
 const _config = configSchema.safeParse({

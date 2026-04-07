@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { GraduationCap, Plus, Trash, Check, X } from 'lucide-react'
+import { GraduationCap, Plus, Trash, Check, X, Edit } from 'lucide-react'
 import api from '../lib/api'
 import { motion, AnimatePresence } from 'framer-motion'
 import { College } from '@admin-panel/types'
@@ -7,6 +7,7 @@ import { College } from '@admin-panel/types'
 const Colleges = () => {
   const [colleges, setColleges] = useState<College[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingCollege, setEditingCollege] = useState<College | null>(null)
   const [newCollege, setNewCollege] = useState({ name: '', domain: '' })
 
   const fetchColleges = async () => {
@@ -20,15 +21,32 @@ const Colleges = () => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault()
-    await api.post('/colleges', newCollege)
+    if (editingCollege) {
+      await api.put(`/colleges/${editingCollege.id}`, newCollege)
+    } else {
+      await api.post('/colleges', newCollege)
+    }
     setIsModalOpen(false)
+    setEditingCollege(null)
     setNewCollege({ name: '', domain: '' })
     fetchColleges()
+  }
+
+  const handleEdit = (college: College) => {
+    setEditingCollege(college)
+    setNewCollege({ name: college.name, domain: college.domain })
+    setIsModalOpen(true)
   }
 
   const toggleActive = async (id: string, isActive: boolean) => {
     await api.patch(`/colleges/${id}/toggle`, { is_active: !isActive })
     fetchColleges()
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setEditingCollege(null)
+    setNewCollege({ name: '', domain: '' })
   }
 
   return (
@@ -49,6 +67,7 @@ const Colleges = () => {
             <tr>
               <th className="p-4 font-semibold">Name</th>
               <th className="p-4 font-semibold">Domain</th>
+              <th className="p-4 font-semibold">Users</th>
               <th className="p-4 font-semibold">Status</th>
               <th className="p-4 font-semibold">Created At</th>
               <th className="p-4 font-semibold">Actions</th>
@@ -69,13 +88,20 @@ const Colleges = () => {
                   {college.name}
                 </td>
                 <td className="p-4 text-slate-400">{college.domain}</td>
+                <td className="p-4 text-slate-400">{college.user_count || 0}</td>
                 <td className="p-4">
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${college.is_active ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
                     {college.is_active ? 'Active' : 'Disabled'}
                   </span>
                 </td>
                 <td className="p-4 text-slate-400 h-10">{new Date(college.created_at).toLocaleDateString()}</td>
-                <td className="p-4">
+                <td className="p-4 flex gap-2">
+                  <button 
+                    onClick={() => handleEdit(college)}
+                    className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                  >
+                    <Edit size={18} />
+                  </button>
                   <button 
                     onClick={() => toggleActive(college.id, college.is_active)}
                     className={`p-2 rounded-lg transition-colors ${college.is_active ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-green-500/10 text-green-400 hover:bg-green-500/20'}`}
@@ -98,7 +124,7 @@ const Colleges = () => {
               exit={{ opacity: 0, scale: 0.9 }}
               className="bg-slate-900 border border-white/10 p-8 rounded-2xl w-full max-w-md space-y-6 shadow-2xl"
             >
-              <h2 className="text-2xl font-bold">Add New College</h2>
+              <h2 className="text-2xl font-bold">{editingCollege ? 'Edit College' : 'Add New College'}</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm text-slate-400">College Name</label>
@@ -122,7 +148,7 @@ const Colleges = () => {
                 </div>
                 <div className="flex gap-3 pt-4">
                   <button 
-                    type="button" onClick={() => setIsModalOpen(false)}
+                    type="button" onClick={closeModal}
                     className="flex-1 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
                   >
                     Cancel
@@ -131,7 +157,7 @@ const Colleges = () => {
                     type="submit"
                     className="flex-1 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 transition-colors"
                   >
-                    Create College
+                    {editingCollege ? 'Update College' : 'Create College'}
                   </button>
                 </div>
               </form>
