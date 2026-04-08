@@ -17,5 +17,10 @@ export default defineConfig({
     'jsonwebtoken',
     'csv-parse',
     '@supabase/supabase-js',
+    'dotenv',
+    'fs',
+    'path',
+    'url',
+    'http',
   ],
 });
