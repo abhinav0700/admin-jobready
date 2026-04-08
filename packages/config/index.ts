@@ -2,11 +2,10 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { z } from 'zod';
 
-// Load .env from root
-// Try to load from various potential root locations (app vs workspace)
-const rootEnvPath = path.resolve(__dirname, '../../.env');
+// Load .env from root of the monorepo
+const rootEnvPath = path.resolve(process.cwd(), '.env');
 dotenv.config({ path: rootEnvPath });
-// Fallback to CWD .env if not found or if running from root
+// Fallback to CWD .env
 dotenv.config(); 
 
 const configSchema = z.object({

@@ -1,14 +1,16 @@
+/// <reference types="vite/client" />
 import axios from 'axios';
 
-// Try to determine the backend port dynamically
-let baseURL = 'http://localhost:54321/api';
-
-// List of ports to try in case the backend chose a different one
-const possiblePorts = [54321, 54322, 54323, 54324, 54325, 54330, 54335, 54340];
+// Use environment variable for API URL in production, fallback to localhost for dev
+let baseURL = import.meta.env.VITE_API_URL || 'http://localhost:54321/api';
 
 const api = axios.create({
   baseURL,
 });
+
+// Only use the port-hunting logic locally (if VITE_API_URL is not set)
+const isLocal = !import.meta.env.VITE_API_URL;
+const possiblePorts = isLocal ? [54321, 54322, 54323, 54324, 54325, 54330, 54335, 54340] : [];
 
 // Add health check interceptor to fallback to other ports if needed
 api.interceptors.response.use(
