@@ -2,7 +2,13 @@
 import axios from 'axios';
 
 // Use environment variable for API URL in production, fallback to localhost for dev
-let baseURL = import.meta.env.VITE_API_URL || 'http://localhost:54321/api';
+let rawBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:54321/api';
+
+// Ensure the URL ends with /api if it's a production URL (starts with http)
+let baseURL = rawBaseURL;
+if (rawBaseURL.startsWith('http') && !rawBaseURL.endsWith('/api') && !rawBaseURL.endsWith('/api/')) {
+  baseURL = `${rawBaseURL.replace(/\/$/, '')}/api`;
+}
 
 const api = axios.create({
   baseURL,
