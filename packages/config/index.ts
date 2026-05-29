@@ -3,7 +3,7 @@ import path from 'path';
 import { z } from 'zod';
 
 // Load .env from root of the monorepo
-const rootEnvPath = path.resolve(process.cwd(), '.env');
+const rootEnvPath = path.resolve(__dirname, '../../.env');
 dotenv.config({ path: rootEnvPath });
 // Fallback to CWD .env
 dotenv.config(); 

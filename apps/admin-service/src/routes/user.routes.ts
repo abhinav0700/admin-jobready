@@ -45,4 +45,24 @@ router.post('/bulk-upload', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/requests', async (req: Request, res: Response) => {
+  try {
+    const requests = await userService.getPendingRequests();
+    res.json(requests);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.patch('/requests/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status, processedBy } = req.body;
+    const result = await userService.updateRequestStatus(id, status, processedBy);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export const userRouter = router;

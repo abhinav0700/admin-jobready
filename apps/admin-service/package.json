@@ -1,7 +1,6 @@
 {
   "name": "@admin-panel/admin-service",
   "version": "1.0.0",
-  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

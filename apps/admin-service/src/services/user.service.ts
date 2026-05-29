@@ -68,7 +68,7 @@ export class UserService {
 
     const { data: profiles, error: profileError } = await supabase
       .from('profiles')
-      .select('id, full_name, college, college_id, created_at')
+      .select('id, full_name, college, college_id, created_at, account_status')
       .or(profileOrQuery)
       .order('created_at', { ascending: false });
 
@@ -83,7 +83,7 @@ export class UserService {
         full_name: p.full_name,
         college: p.college,
         college_id: p.college_id,
-        is_password_changed: false,
+        is_password_changed: p.account_status === 'active',
         role: 'student',
         created_at: p.created_at,
         colleges: collegeDataSet ? { ...collegeDataSet } : null,
@@ -184,4 +184,33 @@ export class UserService {
       recentActivity: [] // Placeholder
     };
   }
+
+  async getPendingRequests(): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('pending_access_requests')
+      .select('*, colleges(id, name)')
+      .order('requested_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  }
+
+  async updateRequestStatus(id: string, status: 'approved' | 'rejected', processedBy: string): Promise<any> {
+    const { data, error } = await supabase
+      .from('pending_access_requests')
+      .update({ status, processed_at: new Date().toISOString(), processed_by: processedBy })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+
+    if (status === 'approved') {
+      const { error: authError } = await supabase.auth.admin.inviteUserByEmail(data.email, {
+        redirectTo: 'http://localhost:5173/auth/callback?type=invite'
+      });
+      if (authError) throw authError;
+    }
+
+    return data;
+  }
 }
+

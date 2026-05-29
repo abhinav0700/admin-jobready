@@ -6,6 +6,8 @@ import Users from './pages/Users'
 import UserDetails from './pages/UserDetails'
 import FacultyColleges from './pages/FacultyColleges'
 import FacultyManagement from './pages/FacultyManagementPage'
+import Requests from './pages/Requests'
+
 
 function App() {
   return (
@@ -29,6 +31,9 @@ function App() {
             <Link to="/faculty" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-400 hover:text-white group">
               <ShieldCheck size={20} className="group-hover:text-orange-400" /> Faculty
             </Link>
+            <Link to="/requests" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-400 hover:text-white group">
+              <Upload size={20} className="group-hover:text-yellow-400" /> Requests
+            </Link>
           </nav>
         </div>
 
@@ -41,6 +46,7 @@ function App() {
             <Route path="/users/:id" element={<UserDetails />} />
             <Route path="/faculty" element={<FacultyColleges />} />
             <Route path="/faculty/college/:id" element={<FacultyManagement />} />
+            <Route path="/requests" element={<Requests />} />
           </Routes>
         </main>
       </div>

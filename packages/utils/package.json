@@ -1,7 +1,11 @@
 {
   "name": "@admin-panel/utils",
   "version": "1.0.0",
+  "type": "module",
   "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "dependencies": {
     "@admin-panel/config": "*",
     "bcrypt": "^5.1.1",

@@ -30,7 +30,7 @@ app.use('/api/faculty', facultyRouter);
 const tryPort = (startPort: number, maxAttempts: number = 20): Promise<number> => {
   return new Promise((resolve, reject) => {
     let attempts = 0;
-    
+
     const attemptBind = (port: number) => {
       const server = app.listen(port, '0.0.0.0', () => {
         console.log(`Admin Service running on port ${port}`);
