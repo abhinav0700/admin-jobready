@@ -56,7 +56,8 @@ const tryPort = (startPort: number, maxAttempts: number = 20): Promise<number> =
   });
 };
 
-const startPort = process.env.PORT ? parseInt(process.env.PORT) : 54321;
+// Bind strictly to 54321 to match the Railway public proxy configuration
+const startPort = 54321;
 tryPort(startPort, 20).catch(err => {
   console.error('Failed to start server:', err.message);
   process.exit(1);
