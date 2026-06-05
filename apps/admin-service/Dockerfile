@@ -27,4 +27,4 @@ ENV NODE_ENV=production
 EXPOSE 54321
 
 # Start the service
-CMD ["node", "apps/admin-service/dist/index.js"]
+CMD ["node", "apps/admin-service/dist/index.mjs"]

@@ -2,8 +2,14 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { z } from 'zod';
 
-// Load .env from root of the monorepo
-const rootEnvPath = path.resolve(__dirname, '../../.env');
+import { fileURLToPath } from 'url';
+
+// Load .env from root of the monorepo in a way compatible with both CommonJS and ESM
+const _dirname = typeof __dirname !== 'undefined'
+  ? __dirname
+  : path.dirname(fileURLToPath(import.meta.url));
+
+const rootEnvPath = path.resolve(_dirname, '../../.env');
 dotenv.config({ path: rootEnvPath });
 // Fallback to CWD .env
 dotenv.config(); 
