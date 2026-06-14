@@ -13,6 +13,18 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+router.post('/', async (req: Request, res: Response) => {
+  try {
+    const { email, password, collegeId, role } = req.body;
+    if (!email) throw new Error('Email is required');
+    
+    const result = await userService.createUser({ email, password, collegeId, role });
+    res.status(201).json(result);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get('/college/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -58,6 +70,9 @@ router.patch('/requests/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { status, processedBy } = req.body;
+    if (!id) throw new Error('ID is required');
+    if (!status) throw new Error('Status is required');
+    if (!processedBy) throw new Error('processedBy is required');
     const result = await userService.updateRequestStatus(id, status, processedBy);
     res.json(result);
   } catch (error: any) {

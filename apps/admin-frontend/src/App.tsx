@@ -12,33 +12,37 @@ import Requests from './pages/Requests'
 function App() {
   return (
     <Router>
-      <div className="flex min-h-screen bg-slate-950 text-slate-50">
+      <div className="flex min-h-screen bg-background text-foreground">
         {/* Sidebar */}
-        <div className="w-64 glass border-r border-white/10 p-6 flex flex-col gap-8">
-          <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent px-2">
-            JobReady
-          </div>
+        <div className="w-64 bg-card border-r border-border p-6 flex flex-col gap-8 shadow-soft">
+          <Link to="/" className="flex items-center gap-2 mb-2 w-full hover:opacity-80 transition-opacity">
+            <img 
+                src="/JobReady.png" 
+                alt="JobReady Logo" 
+                className="h-8 w-auto shrink-0 object-contain" 
+            />
+          </Link>
           <nav className="flex flex-col gap-2">
-            <Link to="/" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-400 hover:text-white group">
-              <LayoutDashboard size={20} className="group-hover:text-blue-400" /> Dashboard
+            <Link to="/" className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-primary/10 hover:text-primary text-muted-foreground group">
+              <LayoutDashboard size={20} className="group-hover:text-primary transition-colors" /> Dashboard
             </Link>
-            <Link to="/colleges" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-400 hover:text-white group">
-              <GraduationCap size={20} className="group-hover:text-purple-400" /> Colleges
+            <Link to="/colleges" className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-primary/10 hover:text-primary text-muted-foreground group">
+              <GraduationCap size={20} className="group-hover:text-primary transition-colors" /> Colleges
             </Link>
-            <Link to="/users" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-400 hover:text-white group">
-              <UsersIcon size={20} className="group-hover:text-green-400" /> Users
+            <Link to="/users" className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-primary/10 hover:text-primary text-muted-foreground group">
+              <UsersIcon size={20} className="group-hover:text-primary transition-colors" /> Users
             </Link>
-            <Link to="/faculty" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-400 hover:text-white group">
-              <ShieldCheck size={20} className="group-hover:text-orange-400" /> Faculty
+            <Link to="/faculty" className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-primary/10 hover:text-primary text-muted-foreground group">
+              <ShieldCheck size={20} className="group-hover:text-primary transition-colors" /> Faculty
             </Link>
-            <Link to="/requests" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-slate-400 hover:text-white group">
-              <Upload size={20} className="group-hover:text-yellow-400" /> Requests
+            <Link to="/requests" className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-primary/10 hover:text-primary text-muted-foreground group">
+              <Upload size={20} className="group-hover:text-primary transition-colors" /> Requests
             </Link>
           </nav>
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/10 via-slate-950 to-slate-950">
+        <main className="flex-1 overflow-auto bg-background/50">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/colleges" element={<Colleges />} />

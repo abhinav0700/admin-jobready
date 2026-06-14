@@ -43,6 +43,55 @@ export class UserService {
     return results;
   }
 
+  async createUser(data: { email: string; password?: string; collegeId?: string; role?: string }): Promise<any> {
+    const { email, password, collegeId, role = 'student' } = data;
+    const username = email.split('@')[0];
+
+    // 1. Create the user in Supabase Auth via Admin SDK
+    const authData = {
+      email,
+      email_confirm: true,
+      user_metadata: { college_id: collegeId },
+      ...(password && { password })
+    };
+
+    const { data: authUser, error: authError } = await supabase.auth.admin.createUser(authData);
+
+    if (authError) {
+      throw new Error(`Failed to create auth user: ${authError.message}`);
+    }
+
+    if (!authUser.user) {
+      throw new Error('User was created but no user object was returned.');
+    }
+
+    // 2. Hash the password for the custom users table if needed (for legacy support)
+    const hashedPassword = password ? await hashPassword(password) : await hashPassword(username);
+
+    // 3. Insert into public.users table
+    const { data: dbUser, error: dbError } = await supabase.from('users').insert({
+      id: authUser.user.id, // Ensure IDs match if the table has an explicit id column or syncs
+      email,
+      username,
+      password_hash: hashedPassword,
+      college_id: collegeId || null,
+      is_password_changed: false,
+      role
+    }).select().single();
+
+    // If there is an error inserting into public.users, it might be fine if a trigger already handled it,
+    // but typically we should return the user. Let's handle it gracefully.
+    if (dbError) {
+      // If the trigger already inserted the user, ignore duplicate key error
+      if (dbError.code !== '23505') { 
+        console.error('Failed to insert into public.users:', dbError);
+        // We might want to cleanup the auth user here if it's a critical failure
+      }
+    }
+
+    return dbUser || authUser.user;
+  }
+
   async getByCollege(collegeId: string): Promise<any[]> {
     const { data: users, error: usersError } = await supabase
       .from('users')

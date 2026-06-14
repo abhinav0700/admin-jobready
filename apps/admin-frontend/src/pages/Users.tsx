@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, Search, Filter, Mail, User, Calendar, Shield } from 'lucide-react'
+import { Users, Search, Filter, Mail, User, Calendar, Shield, Plus, X } from 'lucide-react'
 import api from '../lib/api'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { User as UserType, College } from '@admin-panel/types'
 
 type UserWithCollege = UserType & { college?: string | null; colleges?: College | null; full_name?: string | null }
@@ -14,6 +14,12 @@ const UsersPage = () => {
   const [selectedCollege, setSelectedCollege] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Add User Modal State
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [newUser, setNewUser] = useState({ email: '', password: '', collegeId: '' })
+  const [addLoading, setAddLoading] = useState(false)
+  const [addError, setAddError] = useState('')
 
   useEffect(() => {
     loadColleges()
@@ -49,6 +55,32 @@ const UsersPage = () => {
     }
   }
 
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAddError('')
+    setAddLoading(true)
+    try {
+      await api.post('/users', {
+        email: newUser.email,
+        password: newUser.password,
+        collegeId: newUser.collegeId || undefined
+      })
+      setShowAddModal(false)
+      setNewUser({ email: '', password: '', collegeId: '' })
+      // Reload users if they currently have the same college selected, or if 'All' is selected.
+      if (selectedCollege) {
+        loadUsers(selectedCollege)
+      } else {
+        // Option to reload or we just let it be empty since none selected
+      }
+      alert('User created successfully!')
+    } catch (error: any) {
+      setAddError(error.response?.data?.message || error.message || 'Failed to create user')
+    } finally {
+      setAddLoading(false)
+    }
+  }
+
   const filteredUsers = users.filter(user => {
     const email = (user.email || '').toString().toLowerCase();
     const username = (user.username || user.full_name || '').toString().toLowerCase();
@@ -80,9 +112,18 @@ const UsersPage = () => {
           </h1>
           <p className="text-muted-foreground mt-2">Manage and view users by college</p>
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-bold text-primary">{filteredUsers.length}</div>
-          <div className="text-sm text-muted-foreground">Total Users</div>
+        <div className="text-right flex items-center gap-6">
+          <div>
+            <div className="text-2xl font-bold text-primary">{filteredUsers.length}</div>
+            <div className="text-sm text-muted-foreground">Total Users</div>
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 bg-primary text-black px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+          >
+            <Plus size={18} />
+            Add User
+          </button>
         </div>
       </div>
 
@@ -97,11 +138,11 @@ const UsersPage = () => {
               <Filter size={18} /> Filters
             </h2>
             <div className="space-y-2">
-              <label className="text-xs text-slate-500 uppercase font-bold">Select College</label>
+              <label className="text-xs text-muted-foreground uppercase font-bold tracking-wide">Select College</label>
               <select
                 value={selectedCollege}
                 onChange={e => setSelectedCollege(e.target.value)}
-                className="w-full bg-slate-900 border border-white/10 p-3 rounded-lg focus:outline-none focus:border-primary/50 transition-colors"
+                className="w-full bg-background border border-border text-foreground p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
               >
                 <option value="">Select a college...</option>
                 {colleges.map(c => (
@@ -111,14 +152,14 @@ const UsersPage = () => {
             </div>
 
             {selectedCollege && (
-              <div className="pt-4 border-t border-white/10">
+              <div className="pt-4 border-t border-border">
                 <div className="text-sm text-muted-foreground">
-                  College: <span className="text-white font-medium">
+                  College: <span className="text-foreground font-medium">
                     {colleges.find(c => c.id === selectedCollege)?.name}
                   </span>
                 </div>
                 <div className="text-sm text-muted-foreground mt-1">
-                  Domain: <span className="text-white font-medium">
+                  Domain: <span className="text-foreground font-medium">
                     {colleges.find(c => c.id === selectedCollege)?.domain}
                   </span>
                 </div>
@@ -238,6 +279,101 @@ const UsersPage = () => {
           </motion.div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showAddModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#0f172a] border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold">Add New User</h2>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {addError && (
+                <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 text-red-400 rounded-lg text-sm">
+                  {addError}
+                </div>
+              )}
+
+              <form onSubmit={handleAddUser} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-300">Email Address</label>
+                  <input
+                    type="email"
+                    required
+                    value={newUser.email}
+                    onChange={e => setNewUser({ ...newUser, email: e.target.value })}
+                    className="w-full bg-slate-900 border border-white/10 p-3 rounded-lg focus:outline-none focus:border-primary/50 transition-colors"
+                    placeholder="student@example.com"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-300">Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={newUser.password}
+                    onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                    className="w-full bg-slate-900 border border-white/10 p-3 rounded-lg focus:outline-none focus:border-primary/50 transition-colors"
+                    placeholder="Enter password..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-300">Assign to College (Optional)</label>
+                  <select
+                    value={newUser.collegeId}
+                    onChange={e => setNewUser({ ...newUser, collegeId: e.target.value })}
+                    className="w-full bg-slate-900 border border-white/10 p-3 rounded-lg focus:outline-none focus:border-primary/50 transition-colors"
+                  >
+                    <option value="">No College (Standalone)</option>
+                    {colleges.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="pt-4 flex justify-end gap-3 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="px-4 py-2 hover:bg-white/5 rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={addLoading}
+                    className="bg-primary text-black px-6 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {addLoading ? (
+                      <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                    ) : (
+                      'Create User'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
