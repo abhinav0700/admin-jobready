@@ -118,4 +118,85 @@ export class FacultyService {
 
     return { success: true };
   }
+
+  async getRoleUsers() {
+    // 1. Fetch user_roles
+    const { data: userRoles } = await supabase
+      .from('user_roles')
+      .select('user_id, role')
+      .in('role', ['faculty', 'trainer', 'student']);
+
+    if (!userRoles || userRoles.length === 0) {
+      return { faculties: [], students: [], assignments: [] };
+    }
+
+    const facultyIds = userRoles.filter(r => r.role === 'faculty' || r.role === 'trainer').map(r => r.user_id);
+    const studentIds = userRoles.filter(r => r.role === 'student').map(r => r.user_id);
+    
+    // 2. Fetch profiles
+    const allUserIds = [...facultyIds, ...studentIds];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', allUserIds);
+
+    // 3. Map profiles to their roles
+    const profileRoleMap = new Map(userRoles.map(r => [r.user_id, r.role]));
+
+    // 4. Fetch assignments
+    const { data: assignments } = await supabase
+      .from('faculty_student_assignments')
+      .select('faculty_id, student_id');
+
+    // 5. Format to expected structure
+    const formattedFaculties = (profiles || [])
+      .filter(p => facultyIds.includes(p.id))
+      .map(p => ({
+        id: p.id,
+        name: p.full_name,
+        email: p.email,
+        role: profileRoleMap.get(p.id)
+      })).sort((a, b) => a.name.localeCompare(b.name));
+
+    const formattedStudents = (profiles || [])
+      .filter(p => studentIds.includes(p.id))
+      .map(p => ({
+        id: p.id,
+        name: p.full_name,
+        email: p.email,
+        role: profileRoleMap.get(p.id)
+      })).sort((a, b) => a.name.localeCompare(b.name));
+
+    return { 
+      faculties: formattedFaculties, 
+      students: formattedStudents, 
+      assignments: assignments || [] 
+    };
+  }
+
+  async assignStudentsToFaculty(facultyId: string, studentIds: string[]) {
+    // First delete existing assignments for this faculty
+    await supabase
+      .from('faculty_student_assignments')
+      .delete()
+      .eq('faculty_id', facultyId);
+
+    if (studentIds.length === 0) {
+      return { message: "Assignments cleared successfully." };
+    }
+
+    // Insert new assignments
+    const values = studentIds.map(studentId => ({
+      faculty_id: facultyId,
+      student_id: studentId
+    }));
+
+    const { error } = await supabase
+      .from('faculty_student_assignments')
+      .insert(values);
+
+    if (error) throw error;
+
+    return { message: `Assigned ${studentIds.length} students successfully.` };
+  }
 }

@@ -7,6 +7,7 @@ import UserDetails from './pages/UserDetails'
 import FacultyColleges from './pages/FacultyColleges'
 import FacultyManagement from './pages/FacultyManagementPage'
 import Requests from './pages/Requests'
+import AssignStudents from './pages/AssignStudents'
 
 
 function App() {
@@ -35,6 +36,9 @@ function App() {
             <Link to="/faculty" className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-primary/10 hover:text-primary text-muted-foreground group">
               <ShieldCheck size={20} className="group-hover:text-primary transition-colors" /> Faculty
             </Link>
+            <Link to="/assignments" className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-primary/10 hover:text-primary text-muted-foreground group">
+              <UsersIcon size={20} className="group-hover:text-primary transition-colors" /> Assignments
+            </Link>
             <Link to="/requests" className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-primary/10 hover:text-primary text-muted-foreground group">
               <Upload size={20} className="group-hover:text-primary transition-colors" /> Requests
             </Link>
@@ -50,6 +54,7 @@ function App() {
             <Route path="/users/:id" element={<UserDetails />} />
             <Route path="/faculty" element={<FacultyColleges />} />
             <Route path="/faculty/college/:id" element={<FacultyManagement />} />
+            <Route path="/assignments" element={<AssignStudents />} />
             <Route path="/requests" element={<Requests />} />
           </Routes>
         </main>

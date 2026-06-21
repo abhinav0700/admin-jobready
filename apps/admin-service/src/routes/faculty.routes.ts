@@ -57,4 +57,26 @@ router.delete('/:id', async (req: Request, res: Response) => {
   }
 });
 
+router.post('/assignments/get-role-users', async (req: Request, res: Response) => {
+  try {
+    const data = await facultyService.getRoleUsers();
+    res.json({ success: true, ...data });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/assignments/assign-students', async (req: Request, res: Response) => {
+  try {
+    const { facultyId, studentIds } = req.body;
+    if (!facultyId || !Array.isArray(studentIds)) {
+      throw new Error('facultyId and studentIds array are required');
+    }
+    const result = await facultyService.assignStudentsToFaculty(facultyId, studentIds);
+    res.json({ success: true, ...result });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 export const facultyRouter = router;
